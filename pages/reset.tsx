@@ -4,20 +4,36 @@ import Head from 'next/head'
 
 export default function ResetPasswordPage() {
   const router = useRouter()
-  const { access_token, type } = router.query
 
+  const [accessToken, setAccessToken] = useState('')
   const [newPassword, setNewPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [message, setMessage] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
-  const handleSubmit = async (e: any) => {
+  useEffect(() => {
+    // Парсим hash-фрагмент (после "#") только в браузере
+    if (typeof window !== 'undefined') {
+      const hash = window.location.hash // например: "#access_token=abc123&expires_at=..."
+      if (hash) {
+        const params = new URLSearchParams(hash.substring(1)) // убираем '#'
+        const token = params.get('access_token')
+        if (token) {
+          setAccessToken(token)
+        } else {
+          setError('No access token in URL hash')
+        }
+      }
+    }
+  }, [])
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setMessage('')
     setError('')
 
-    if (!access_token || typeof access_token !== 'string') {
+    if (!accessToken) {
       setError('Invalid access token.')
       return
     }
@@ -35,28 +51,28 @@ export default function ResetPasswordPage() {
     setLoading(true)
 
     try {
-      const res = await fetch('https://tfed-backend.onrender.com/auth/change-password', {
+      const response = await fetch('https://tfed-backend.onrender.com/auth/change-password', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${access_token}`,
+          Authorization: `Bearer ${accessToken}`, // берем из state
         },
         body: JSON.stringify({
-          oldPassword: 'placeholder',
+          oldPassword: 'placeholder', // зависит от вашего бэкенда
           newPassword,
         }),
       })
 
-      const data = await res.json()
+      const result = await response.json()
 
-      if (!res.ok) {
-        setError(data.message || 'Something went wrong.')
+      if (!response.ok) {
+        setError(result?.message || 'Something went wrong.')
       } else {
-        setMessage('Password changed successfully! You can now close this tab.')
+        setMessage('Password changed successfully. You may now log in.')
       }
-    } catch (err: any) {
-      console.error(err)
-      setError('Unexpected error occurred.')
+    } catch (err) {
+      console.error('Password reset error:', err)
+      setError('Unexpected error occurred. Please try again.')
     } finally {
       setLoading(false)
     }
@@ -76,6 +92,7 @@ export default function ResetPasswordPage() {
             value={newPassword}
             onChange={(e) => setNewPassword(e.target.value)}
             style={styles.input}
+            required
           />
           <input
             type="password"
@@ -83,11 +100,13 @@ export default function ResetPasswordPage() {
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
             style={styles.input}
+            required
           />
           <button type="submit" disabled={loading} style={styles.button}>
             {loading ? 'Resetting...' : 'Reset Password'}
           </button>
         </form>
+
         {message && <p style={styles.success}>{message}</p>}
         {error && <p style={styles.error}>{error}</p>}
       </div>
