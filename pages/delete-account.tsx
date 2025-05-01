@@ -13,17 +13,25 @@ export default function DeleteAccountPage() {
         <h1>Delete Your Account</h1>
 
         <p>
-          If you would like to delete your TFED Club account and associated personal data, please follow the
-          steps below. This action is irreversible.
+          If you would like to delete your TFED Club account and associated personal data,
+          simply click the button below. This action is irreversible and will be processed within 7 days.
         </p>
 
-        <h2>Step-by-Step Instructions</h2>
-        <ol>
-          <li>Open the TFED Club mobile application.</li>
-          <li>Navigate to <strong>Profile</strong> → <strong>Settings</strong> → <strong>Account</strong>.</li>
-          <li>Tap on <strong>Request Account Deletion</strong>.</li>
-          <li>Confirm your request. We will process the deletion within 7 days.</li>
-        </ol>
+        <button
+          style={{
+            backgroundColor: '#2f516b',
+            color: '#fff',
+            padding: '0.75rem 1.5rem',
+            fontSize: '1rem',
+            border: 'none',
+            borderRadius: '6px',
+            cursor: 'pointer',
+            margin: '1.5rem 0',
+          }}
+          onClick={() => window.location.href = 'mailto:tennis.fedotov@gmail.com?subject=Request to Delete Account'}
+        >
+          Request Account Deletion
+        </button>
 
         <h2>What Will Be Deleted</h2>
         <ul>
